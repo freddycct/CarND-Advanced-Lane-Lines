@@ -17,18 +17,21 @@ The goals / steps of this project are the following:
 
 [//]: # (Image References)
 
-[image1]: ./examples/undistort_output.png "Undistorted"
-[image2]: ./test_images/test1.jpg "Road Transformed"
-[image3]: ./examples/binary_combo_example.jpg "Binary Example"
-[image4]: ./examples/warped_straight_lines.jpg "Warp Example"
-[image5]: ./examples/color_fit_lines.jpg "Fit Visual"
-[image6]: ./examples/example_output.jpg "Output"
-[video1]: ./project_video.mp4 "Video"
+[video1]: ./project_video.lanes.mp4 "Video"
 
 [distortion_correction]: output_images/distortion_correction.png "before and after correction"
 [original_undistorted]: output_images/original_undistorted.png "before and after correction"
 [perspective1]: output_images/perspective1.png
 [perspective2]: output_images/perspective2.png
+[binarize_warp]: output_images/binarize_warp.png
+[warp_binarize]: output_images/warp_binarize.png
+[grayscale_or_schannel]: output_images/grayscale_or_schannel.png
+[grayscale_or_schannel1]: output_images/grayscale_or_schannel_1.png
+[binarize_images]: output_images/binarize_images.png
+[a]: output_images/a.png
+[b]: output_images/b.png
+[polynomial]: output_images/polynomial.png
+[final]: output_images/final.png
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
 
@@ -65,7 +68,7 @@ I do the perspective warping first because I am curious about whether we should
 1. warp first then apply color+gradient thresholds .
 2. or apply color+gradient thresholds then warp the image.
 
-I hardcode the source points in the following manner using this image ![perspective1]:
+I hardcode the source points in the following manner using this image (look for the red dots) ![perspective1]:
 
 ```python
 src = np.float32([
@@ -96,24 +99,40 @@ I verified that my perspective transform was working as expected by drawing the 
 ![perspective2]
 
 
-#### 2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
+#### 3. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
+
+This section determines wheher we should warp perspective then binarize the image or binarize the image then warp the perspective of the image.
 
 I used a combination of color and gradient thresholds to generate a binary image.
+
 Refer to function filter_colors_hsv for the color thresholds to detect yellow and white lane lines.
 
-For gradient thresholds, I apply the sobel filter on the S channel of the image in HSV domain.
+First I try to warp then filter colors and binarize it, I obtain the following:
+![warp_binarize]
 
-(thresholding steps at lines # through # in `another_file.py`).  Here's an example of my output for this step.  (note: this is not actually from one of the test images)
+Then I filter colors, binarize it then warp it, I obtain the following:
+![binarize_warp]
 
-![alt text][image3]
+It is not clear which sequence is better, so now I work on the gradient thresholds.
 
+For gradient thresholds, there is a decision of whether we should apply the sobel filter on the grayscale image or the s channel of the image from HSV space.
+![grayscale_or_schannel]
+![grayscale_or_schannel1]
+After applying sobel filter in (x & y direction) on the grayscale and schannel, I zoomed in on the lane lines to determine which is a better choice. So it seems that the sobel filter works very clearly in the S channel.
 
+Then I zoom further in on the two images above and determined that a lower threshold of 20 on the pixel values is sufficient to detect the lane lines. These are the outcome of the binary images.
+![binarize_images]
+I determine that the sobel filter on the x direction is sufficiently good enough.
+
+Finally, back to the issue of whether to warp then binarize or binarize then warp, I looked at the sobel gradients for this two images:
+![a]
+![b]
+
+So I determine it is better to binarize then warp.
 
 #### 4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
 
-Then I did some other stuff and fit my lane lines with a 2nd order polynomial kinda like this:
-
-![alt text][image5]
+![polynomial]
 
 #### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
@@ -123,7 +142,7 @@ I did this in lines # through # in my code in `my_other_file.py`
 
 I implemented this step in lines # through # in my code in `yet_another_file.py` in the function `map_lane()`.  Here is an example of my result on a test image:
 
-![alt text][image6]
+![final]
 
 ---
 
@@ -131,7 +150,7 @@ I implemented this step in lines # through # in my code in `yet_another_file.py`
 
 #### 1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (wobbly lines are ok but no catastrophic failures that would cause the car to drive off the road!).
 
-Here's a [link to my video result](./project_video.mp4)
+Here's a [link to my video result]![video1]
 
 ---
 
