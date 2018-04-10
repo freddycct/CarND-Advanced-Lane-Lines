@@ -186,6 +186,11 @@ Here's a [link to my video result](./project_video.lanes.mp4)
 
 #### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
+One thing I did was to check that if the left lane is on the right of the right lane, then abandon information from current frame, and treat the next frame as an independent new frame by using ```sliding_window()``` instead of ```next_frame()```.
+```
+if np.mean(left_fitx) >= np.mean(right_fitx):
+```
+
 These codes do not work on the challenge videos because of lines on roads due to road repairs, lots of shadows, and lanes that curve a lot.
 
 In general, traditional CV methods are tedious because of the amount of effort to handtune thresholds. We are actually doing manual backpropagation by hand tuning the thresholds.
