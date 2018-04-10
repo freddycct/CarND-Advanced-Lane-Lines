@@ -26,6 +26,7 @@ The goals / steps of this project are the following:
 [video1]: ./project_video.mp4 "Video"
 
 [distortion_correction]: output_images/distortion_correction.png "before and after correction"
+[original_undistorted]: output_images/original_undistorted.png "before and after correction"
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
 
@@ -54,7 +55,7 @@ I then used the output `objpoints` and `imgpoints` to compute the camera calibra
 #### 1. Provide an example of a distortion-corrected image.
 
 To demonstrate this step, I will describe how I apply the distortion correction to one of the test images like this one:
-![alt text][image2]
+![original_undistorted]
 
 #### 2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
 
