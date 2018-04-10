@@ -17,8 +17,6 @@ The goals / steps of this project are the following:
 
 [//]: # (Image References)
 
-[video1]: ./project_video.lanes.mp4 "Video"
-
 [distortion_correction]: output_images/distortion_correction.png "before and after correction"
 [original_undistorted]: output_images/original_undistorted.png "before and after correction"
 [perspective1]: output_images/perspective1.png
@@ -59,12 +57,13 @@ I then used the output `objpoints` and `imgpoints` to compute the camera calibra
 
 #### 1. Provide an example of a distortion-corrected image.
 
-To demonstrate this step, I will describe how I apply the distortion correction to one of the test images like this one:
+Use the mtx, dist obtained in previous step to undistort an image by calling this 
+```cv2.undistort(img, mtx, dist, None, mtx)```
 ![original_undistorted]
 
 #### 2. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 
-I do the perspective warping first because I am curious about whether we should 
+I discuss the perspective warping first because I am curious about whether we should 
 1. warp first then apply color+gradient thresholds .
 2. or apply color+gradient thresholds then warp the image.
 
@@ -98,6 +97,10 @@ This resulted in the following source and destination points:
 I verified that my perspective transform was working as expected by drawing the `src` and `dst` points onto a test image and its warped counterpart to verify that the lines appear parallel in the warped image.
 ![perspective2]
 
+```
+warp_matrix = cv2.getPerspectiveTransform(src, dest) 
+Minv = cv2.getPerspectiveTransform(dest, src) # inverse transform
+```
 
 #### 3. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
 
@@ -105,7 +108,7 @@ This section determines wheher we should warp perspective then binarize the imag
 
 I used a combination of color and gradient thresholds to generate a binary image.
 
-Refer to function filter_colors_hsv for the color thresholds to detect yellow and white lane lines.
+Refer to function ```filter_colors_hsv``` for the color thresholds to detect yellow and white lane lines.
 
 First I try to warp then filter colors and binarize it, I obtain the following:
 ![warp_binarize]
@@ -115,7 +118,7 @@ Then I filter colors, binarize it then warp it, I obtain the following:
 
 It is not clear which sequence is better, so now I work on the gradient thresholds.
 
-For gradient thresholds, there is a decision of whether we should apply the sobel filter on the grayscale image or the s channel of the image from HSV space.
+For gradient thresholds, there is a decision of whether we should apply the sobel filter on the grayscale image or the s channel of the image from HSV space. The sobel filter code is in the function ```sobel_filter```
 ![grayscale_or_schannel]
 ![grayscale_or_schannel1]
 After applying sobel filter in (x & y direction) on the grayscale and schannel, I zoomed in on the lane lines to determine which is a better choice. So it seems that the sobel filter works very clearly in the S channel.
@@ -132,16 +135,29 @@ So I determine it is better to binarize then warp.
 
 #### 4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
 
+```
+def sliding_window(binary_warped, nwindows=9)
+```
+The main idea is to find high concentrations of white pixels in left half and right half of the image. Then apply a sliding window method to find the (x,y) points.
+```
+def next_frame(binary_warped, left_fit, right_fit) # for subsequent frames in a video
+```
+The sliding window can reduce several redundant computations based on the information from previous frame. This is possible because the lane lines do not abruptly change between two frames.
+
+This is an example of the polynomial found in the warped image.
 ![polynomial]
 
 #### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
-I did this in lines # through # in my code in `my_other_file.py`
+```def get_radius_of_curvature(leftx, rightx, lefty, righty, y_eval)```
+The radius of curvature tends to infinity for straight lines and goes toward zero for high curvature roads.
 
 #### 6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
 
-I implemented this step in lines # through # in my code in `yet_another_file.py` in the function `map_lane()`.  Here is an example of my result on a test image:
+The codes to draw the lane lines in green is given in this pipeline function.
+```def pipeline(img):```
 
+This is an example of the final result in a frame of the video.
 ![final]
 
 ---
@@ -158,4 +174,8 @@ Here's a [link to my video result](./project_video.lanes.mp4)
 
 #### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+These codes do not work on the challenge videos because of lines on roads due to road repairs, lots of shadows, and lanes that curve a lot.
+
+In general, traditional CV methods are tedious because of the amount of effort to handtune thresholds. We are actually doing manual backpropagation by hand tuning the thresholds.
+
+I think a deep learning CV approach would make it more robust.
