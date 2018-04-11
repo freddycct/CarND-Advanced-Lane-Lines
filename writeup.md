@@ -144,6 +144,8 @@ def next_frame(binary_warped, left_fit, right_fit) # for subsequent frames in a 
 ```
 The sliding window can reduce several redundant computations based on the information from previous frame. This is possible because the lane lines do not abruptly change between two frames.
 
+Then use ```np.polyfit``` to find the coefficients of this quadratic line.
+
 This is an example of the polynomial found in the warped image.
 ![polynomial]
 
@@ -151,6 +153,16 @@ This is an example of the polynomial found in the warped image.
 
 ```def get_radius_of_curvature(leftx, rightx, lefty, righty, y_eval)```
 The radius of curvature tends to infinity for straight lines and goes toward zero for high curvature roads.
+
+To determine position of vehicle from center,
+```
+if img_center < lane_center:
+    # vehicle is left of lane center
+    text = 'Vehicle is left of center by: {:.3g}(m)'.format((lane_center - img_center) / 700)
+  else: # if img_center > lane_center
+    # vehicle is right of lane center
+    text = 'Vehicle is right of center by: {:.3g}(m)'.format((img_center - lane_center) / 700)
+ ```
 
 #### 6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
 
@@ -173,6 +185,11 @@ Here's a [link to my video result](./project_video.lanes.mp4)
 ### Discussion
 
 #### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
+
+One thing I did was to check that if the left lane is on the right of the right lane, then abandon information from current frame, and treat the next frame as an independent new frame by using ```sliding_window()``` instead of ```next_frame()```.
+```
+if np.mean(left_fitx) >= np.mean(right_fitx):
+```
 
 These codes do not work on the challenge videos because of lines on roads due to road repairs, lots of shadows, and lanes that curve a lot.
 
